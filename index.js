@@ -6,7 +6,7 @@ import gradient from 'gradient-string';
 import chalkAnimation from "chalk-animation";
 import figlet from "figlet";
 import { createPromptModule } from "inquirer";
-import { getallCountries, getallCapitals, getallLandLocked } from './utils/country.js'
+import { getallCountries, getallCapitals, getallLandLocked, getByFirstLetter } from './utils/country.js'
 import ora from 'ora';
 
 let game_name;
@@ -15,6 +15,12 @@ const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
 
 async function welcome() {
   const rainbowTitle = chalkAnimation.rainbow('Welcome to Geography Quiz \n')
+  await sleep()
+  rainbowTitle.stop();
+}
+
+async function YouWon() {
+  const rainbowTitle = chalkAnimation.rainbow('You Won! \n')
   await sleep()
   rainbowTitle.stop();
 }
@@ -144,9 +150,10 @@ async function gameTwo() {
   }
   console.log(chalk.bgGreen.bold(`\n  lets start you have to name ${capitalCount} capitals
   you can choose atmost three wrong answers 
+  write p if you want to skip a country
   start writing :)`))
 
-  while (strike <= 3 || score <= capitalCount) {
+  while (strike <= 3 && score <= capitalCount &&) {
 
     if (strike === 3) {
       console.log(chalk.bgRed(`\n You lost :\(`))
@@ -260,6 +267,64 @@ async function gameThree() {
       strike++;
       console.log(chalk.bgRed(`\n You are incorrect, Stike: ${strike}/3`))
     }
+  }
+}
+
+async function gameFour() {
+  let countryCount = 0, strike = 0, score = 0;
+
+  const spinner = ora('Fetching data').start();
+  let charMap = await getByFirstLetter();
+  spinner.succeed('Data fetched successfully');
+
+  function getRandomKey(map) {
+    const keysArray = Array.from(map.keys());
+    const randomIndex = Math.floor(Math.random() * keysArray.length);
+    return keysArray[randomIndex];
+  }
+  const randomCountry = getRandomKey(charMap);
+  countryCount = charMap.get(randomCountry).length
+  let country_lst = charMap.get(randomCountry);
+
+  console.log(chalk.cyan(`\n  lets start
+  you have to name all the countries starting with the ${randomCountry} 
+  there are ${countryCount} in total 
+  You can have at most three wrong answers :)`))
+
+  while(strike <= 3 && score <= countryCount){
+    if (strike === 3) {
+      console.log(chalk.bgRed(`\n You lost :\(`))
+      console.log("\n Actual Answers")
+      console.log(country_lst)
+      return
+    }
+    else if (score === countryCount) {
+      await YouWon();
+      return
+    }
+
+    let answer;
+    async function askCountry() {
+      const answers = await inquirer.prompt({
+        name: 'userInput',
+        type: 'input',
+        message: `Write the name of the country starting with ${randomCountry}: `,
+      });
+      answer = answers.userInput
+    }
+
+    await askCountry()
+
+    if(country_lst.includes(answer)){
+      score++;
+      country_lst = country_lst.filter(item => item !== answer);
+      console.log(chalk.green(`\n You are correct, Score: ${score}/${countryCount}`))
+    }
+    else{
+      strike++;
+      console.log(chalk.red(`\n You are incorrect, Strike: ${strike}/3`))
+    }
+
   }
 
 }
