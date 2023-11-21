@@ -32,7 +32,7 @@ async function chooseGame() {
     message: 'Which game you want to play? \n',
     choices: [
       'Name n number of countries',
-      'Name capitals of differenct countries',
+      'Name capitals of different countries',
       'Tell whether a country is landlocked or not.',
       'Guess the countries starting with a specific letter',
     ],
@@ -46,7 +46,7 @@ function handleAnswers(answers) {
       gameOne();
       break;
 
-    case 'Name capitals of differenct countries':
+    case 'Name capitals of different countries':
       gameTwo();
       break;
 
@@ -61,6 +61,10 @@ function handleAnswers(answers) {
     default:
       console.log('not a valid option')
   }
+}
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
 async function gameOne() {
@@ -87,18 +91,18 @@ async function gameOne() {
     console.log(chalk.red(`\n You cant choose a number less than 0 or greater than ${country_lst.len}`));
     return
   }
-  console.log(chalk.green.bold(`\n  lets start you have to name ${countryCount} countries
+  console.log(chalk.green(`\n  lets start you have to name ${countryCount} countries
   you can choose atmost three wrong answers 
   start writing :)`))
 
   while (strike <= 3 || score <= countryCount) {
 
     if (strike === 3) {
-      console.log(chalk.bgRed(`\n You lost :\(`))
+      console.log(chalk.red(`\n You lost :\(`))
       return
     }
     else if (score == countryCount) {
-      console.log(chalk.bgGreen(`\n You Won :\)`))
+      console.log(chalk.green(`\n You Won :\)`))
       return
     }
 
@@ -112,15 +116,16 @@ async function gameOne() {
       answer = answers.userInput
     }
     await askCountry()
+    answer = capitalizeFirstLetter(answer)
 
     if (country_lst.includes(answer)) {
       score++
       country_lst = country_lst.filter(item => item !== answer);
-      console.log(chalk.bgGreen.bold(`\n You are correct, Score: ${score}/${countryCount}`))
+      console.log(chalk.cyan(`\n You are correct, Score: ${score}/${countryCount}`))
     }
     else {
       strike++;
-      console.log(chalk.bgRed(`\n You are incorrect, Stike: ${strike}/3`))
+      console.log(chalk.gray(`\n You are incorrect, Stike: ${strike}/3`))
     }
 
   }
@@ -148,19 +153,23 @@ async function gameTwo() {
     console.log(chalk.red(`\n You cant choose a number less than 0 or greater than ${capitalMap.size}`));
     return
   }
-  console.log(chalk.bgGreen.bold(`\n  lets start you have to name ${capitalCount} capitals
+  console.log(chalk.bgGreen(`\n  lets start you have to name ${capitalCount} capitals
   you can choose atmost three wrong answers 
   write p if you want to skip a country
   start writing :)`))
 
-  while (strike <= 3 && score <= capitalCount &&) {
+  while (strike <= 3 && score <= capitalCount) {
 
+    if(capitalMap.size  === 0){
+      console.log(chalk.red(`\n We ran out of options`));
+      return;
+    }
     if (strike === 3) {
-      console.log(chalk.bgRed(`\n You lost :\(`))
+      console.log(chalk.red(`\n You lost :\(`))
       return
     }
     else if (score == capitalCount) {
-      console.log(chalk.bgGreen(`\n You Won :\)`))
+      console.log(chalk.green(`\n You Won :\)`))
       return
     }
 
@@ -180,16 +189,22 @@ async function gameTwo() {
       return keysArray[randomIndex];
     }
     const randomCountry = getRandomKey(capitalMap);
-    await askCountry(randomCountry)
+    await askCountry(randomCountry);
+
+    if(answer === 'p' || answer === 'P'){
+      capitalMap.delete(randomCountry);
+      continue
+    }
+    answer = capitalizeFirstLetter(answer);
 
     if (capitalMap.get(randomCountry).includes(answer)) {
       score++
       capitalMap.delete(randomCountry)
-      console.log(chalk.bgGreen.bold(`\n You are correct, Score: ${score}/${capitalCount}`))
+      console.log(chalk.cyan(`\n You are correct, Score: ${score}/${capitalCount}`))
     }
     else {
       strike++;
-      console.log(chalk.bgRed(`\n You are incorrect, Stike: ${strike}/3`))
+      console.log(chalk.dim(`\n You are incorrect, Stike: ${strike}/3`))
     }
 
   }
@@ -252,6 +267,8 @@ async function gameThree() {
     }
     const randomCountry = getRandomKey(landlockedMap);
     await askCountry(randomCountry)
+    
+    answer = answer.toLowerCase();
 
     if (landlockedMap.get(randomCountry) === true && answer === 'y') {
       score++
@@ -291,7 +308,7 @@ async function gameFour() {
   there are ${countryCount} in total 
   You can have at most three wrong answers :)`))
 
-  while(strike <= 3 && score <= countryCount){
+  while (strike <= 3 && score <= countryCount) {
     if (strike === 3) {
       console.log(chalk.bgRed(`\n You lost :\(`))
       console.log("\n Actual Answers")
@@ -312,15 +329,16 @@ async function gameFour() {
       });
       answer = answers.userInput
     }
+    answer = capitalizeFirstLetter(answer);
 
     await askCountry()
 
-    if(country_lst.includes(answer)){
+    if (country_lst.includes(answer)) {
       score++;
       country_lst = country_lst.filter(item => item !== answer);
       console.log(chalk.green(`\n You are correct, Score: ${score}/${countryCount}`))
     }
-    else{
+    else {
       strike++;
       console.log(chalk.red(`\n You are incorrect, Strike: ${strike}/3`))
     }
