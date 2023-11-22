@@ -37,25 +37,26 @@ async function chooseGame() {
       'Guess the countries starting with a specific letter',
     ],
   });
-  return handleAnswers(answers.name);
+
+ await handleAnswers(answers.name);
 }
 
-function handleAnswers(answers) {
+async function handleAnswers(answers) {
   switch (answers) {
     case 'Name n number of countries':
-      gameOne();
+      await gameOne();
       break;
 
     case 'Name capitals of different countries':
-      gameTwo();
+      await gameTwo();
       break;
 
     case 'Tell whether a country is landlocked or not.':
-      gameThree()
+      await gameThree()
       break;
 
     case 'Guess the countries starting with a specific letter':
-      gameFour()
+      await gameFour()
       break;
 
     default:
@@ -102,7 +103,7 @@ async function gameOne() {
       return
     }
     else if (score == countryCount) {
-      console.log(chalk.green(`\n You Won :\)`))
+      await YouWon();
       return
     }
 
@@ -160,7 +161,7 @@ async function gameTwo() {
 
   while (strike <= 3 && score <= capitalCount) {
 
-    if(capitalMap.size  === 0){
+    if (capitalMap.size === 0) {
       console.log(chalk.red(`\n We ran out of options`));
       return;
     }
@@ -169,7 +170,7 @@ async function gameTwo() {
       return
     }
     else if (score == capitalCount) {
-      console.log(chalk.green(`\n You Won :\)`))
+      await YouWon();
       return
     }
 
@@ -191,7 +192,7 @@ async function gameTwo() {
     const randomCountry = getRandomKey(capitalMap);
     await askCountry(randomCountry);
 
-    if(answer === 'p' || answer === 'P'){
+    if (answer === 'p' || answer === 'P') {
       capitalMap.delete(randomCountry);
       continue
     }
@@ -246,7 +247,7 @@ async function gameThree() {
       return
     }
     else if (score === landlockedCount) {
-      console.log(chalk.bgGreen(`\n You Won :\)`))
+      await YouWon();
       return
     }
 
@@ -267,7 +268,7 @@ async function gameThree() {
     }
     const randomCountry = getRandomKey(landlockedMap);
     await askCountry(randomCountry)
-    
+
     answer = answer.toLowerCase();
 
     if (landlockedMap.get(randomCountry) === true && answer === 'y') {
@@ -304,8 +305,8 @@ async function gameFour() {
   let country_lst = charMap.get(randomCountry);
 
   console.log(chalk.cyan(`\n  lets start
-  you have to name all the countries starting with the ${randomCountry} 
-  there are ${countryCount} in total 
+  you have to name all the countries starting with the letter ${randomCountry} 
+  there are ${countryCount} countries in total that start with this letter
   You can have at most three wrong answers :)`))
 
   while (strike <= 3 && score <= countryCount) {
@@ -329,9 +330,9 @@ async function gameFour() {
       });
       answer = answers.userInput
     }
-    answer = capitalizeFirstLetter(answer);
 
     await askCountry()
+    answer = capitalizeFirstLetter(answer);
 
     if (country_lst.includes(answer)) {
       score++;
@@ -347,6 +348,22 @@ async function gameFour() {
 
 }
 
-
-// await welcome()
+await welcome()
 await chooseGame()
+
+figlet("Thanks for Playing!", function (err, data) {
+  if (err) {
+    console.log("Something went wrong...");
+    console.dir(err);
+    return;
+  }
+  console.log(data);
+});
+
+
+
+
+
+
+
+
